@@ -20,18 +20,6 @@ namespace odTimeTracker
 		private static string Command;
 		private static string CommandValue;
 
-		public static string HomeDirPath {
-			get {
-				return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile); 
-			}
-		}
-
-		public static string ConfigFilePath {
-			get {
-				return Path.Combine(HomeDirPath, ".odtimetracker.conf"); 
-			}
-		}
-
 		/// <summary>Instance of used storage.</summary>
 		private static SqliteStorage storage;
 		public static SqliteStorage Storage {
@@ -60,15 +48,6 @@ namespace odTimeTracker
 			Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
 
 			return (res == "y");
-		}
-
-		/// <summary>
-		/// Checks if configuration file exists.
-		/// </summary>
-		/// <returns><c>true</c>, if config file exists, <c>false</c> otherwise.</returns>
-		public static bool CheckIfConfigFileExists()
-		{
-			return File.Exists(ConfigFilePath);
 		}
 
 		/// <summary>
@@ -305,9 +284,6 @@ namespace odTimeTracker
 				case "info":
 					CmdInfo();
 					break;
-				case "install":
-					CmdInstall();
-					break;
 				case "list":
 					CmdList(CommandValue);
 					break;
@@ -346,7 +322,6 @@ namespace odTimeTracker
 			PrintLine("Commands", ConsoleColor.White);
 			PrintLine(" help [<topic>]   Display help (general or on given topic)");
 			PrintLine(" info             Info about current application status");
-			PrintLine(" install          Installation and configuration wizard");
 			PrintLine(" list <what>      List data (activities, today statistics etc.)");
 			PrintLine(" start <activity> Start new activity");
 			PrintLine(" stop             Stop currently running activity", ConsoleColor.Gray, true);
@@ -359,14 +334,6 @@ namespace odTimeTracker
 		/// </summary>
 		private static void CmdInfo()
 		{
-			// Check if user's configuration already exists
-			if (CheckIfConfigFileExists() != true)
-			{
-				PrintLine("Configuration was not found. You should run `install` command.", 
-					ConsoleColor.Red, true);
-				return;
-			}
-
 			var fActivity = Storage.GetRunningActivity();
 			if (fActivity[0] == null)
 			{
@@ -381,56 +348,12 @@ namespace odTimeTracker
 		}
 
 		/// <summary>
-		/// Command `install` - creates configuration file.
-		/// </summary>
-		private static void CmdInstall()
-		{
-			// Note: In fact we don't need `.odtimetracker.conf` file right now but in future 
-			// we want to store there values for default user and also enable more databases 
-			// types (MySql, PostgreSql etc. - ODBC probably)...
-
-			if (CheckIfConfigFileExists() == true)
-			{
-				if (!AskYesNoQuestion("Configuration file already exists! Do you want to continue?"))
-				{
-					return;
-				}
-			} 
-			else
-			{
-				if (!AskYesNoQuestion("Default configuration files will be created " + 
-					"in your home folder. Do you want to continue?"))
-				{
-					return;
-				}
-			}
-
-			// Create `~/.odtimetracker.conf` file!
-			StreamWriter stream;
-			stream = File.CreateText(ConfigFilePath);
-			stream.WriteLine("db_type=sqlite");
-			stream.WriteLine("db_path=" + SqliteStorage.DatabaseFilePath);
-			stream.Close();
-
-			PrintLine("Configuration file successfully created. Now you can " + 
-				"start using this application.", ConsoleColor.Green, true);
-		}
-
-		/// <summary>
 		/// Command `list` - prints list of requested data to the console.
 		/// Supported data to list: activities, projects, today
 		/// </summary>
 		/// <param name="what">What data to list.</param>
 		private static void CmdList(string what)
 		{
-			// Check if user's configuration already exists
-			if (CheckIfConfigFileExists() != true)
-			{
-				PrintLine("Configuration was not found. You should run `install` command.", 
-					ConsoleColor.Red, true);
-				return;
-			}
-
 			switch (what)
 			{
 				case "activities":
@@ -455,14 +378,6 @@ namespace odTimeTracker
 		/// <param name="activityString">Activity description.</param> 
 		private static void CmdStart(string activityString)
 		{
-			// Check if user's configuration already exists
-			if (CheckIfConfigFileExists() != true)
-			{
-				PrintLine("Configuration was not found. You should run `install` command.", 
-					ConsoleColor.Red, true);
-				return;
-			}
-
 			// Check if there is running activity
 			var fActivity = Storage.GetRunningActivity();
 			if (fActivity[0] != null)
@@ -489,13 +404,6 @@ namespace odTimeTracker
 		/// </summary>
 		private static void CmdStop()
 		{
-			if (CheckIfConfigFileExists() != true)
-			{
-				PrintLine("Configuration was not found. You should run `install` command.", 
-					ConsoleColor.Red, true);
-				return;
-			}
-
 			var fActivity = Storage.GetRunningActivity();
 			if (fActivity[0] == null)
 			{
