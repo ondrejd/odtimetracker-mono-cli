@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "odtimetracker", "odtimetracker.csproj", "{D327C8FB-0F3B-4803-92FB-1B4F8E311C26}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D327C8FB-0F3B-4803-92FB-1B4F8E311C26}.Debug|x86.ActiveCfg = Debug|x86
+		{D327C8FB-0F3B-4803-92FB-1B4F8E311C26}.Debug|x86.Build.0 = Debug|x86
+		{D327C8FB-0F3B-4803-92FB-1B4F8E311C26}.Release|x86.ActiveCfg = Release|x86
+		{D327C8FB-0F3B-4803-92FB-1B4F8E311C26}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = odtimetracker.csproj
+	EndGlobalSection
+EndGlobal
