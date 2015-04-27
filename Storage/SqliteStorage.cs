@@ -1,6 +1,7 @@
 ﻿namespace odTimeTracker
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using Mono.Data.Sqlite;
 	using odTimeTracker.Model;
@@ -164,10 +165,11 @@
 							Activity a = new Activity();
 							a.ActivityId = (long) rdr["ActivityId"];
 							a.ProjectId = (long) rdr["ProjectId"];
-							a.Name = (string) rdr["Name"];
-							a.Description = (string) rdr["Description"];
-							a.Created = DateTime.Parse((string) rdr["Created"]);
-							a.Stopped = DateTime.Parse((string) rdr["Stopped"]);
+							a.Name = rdr["Name"].ToString();
+							a.Description = rdr["Description"].ToString();
+							a.Tags = rdr["Tags"].ToString();
+							a.Created = DateTime.Parse(rdr["Created"].ToString());
+							a.Stopped = DateTime.Parse(rdr["Stopped"].ToString());
 							Ret[0] = a;
 						}
 					}         
@@ -259,6 +261,36 @@
 				return project;
 			}
 
+			/// <summary>Selects latest five activities (just temporary).</summary>
+			/// <returns>Latest five activities.</returns>
+			public List<Activity> SelectActivities()
+			{
+				List<Activity> Activities = new List<Activity>();
+
+				string sql = "SELECT * FROM Activities ORDER BY ActivityId DESC LIMIT 5; ";
+
+				using (SqliteCommand cmd = new SqliteCommand(sql, Connection))
+				{
+					using (SqliteDataReader rdr = cmd.ExecuteReader())
+					{
+						while (rdr.Read())
+						{
+							Activity a = new Activity();
+							a.ActivityId = (long) rdr["ActivityId"];
+							a.ProjectId = (long) rdr["ProjectId"];
+							a.Name = rdr["Name"].ToString();
+							a.Description = rdr["Description"].ToString();
+							a.Tags = rdr["Tags"].ToString();
+							a.Created = DateTime.Parse((string) rdr["Created"]);
+							a.Stopped = DateTime.Parse((string) rdr["Stopped"]);
+							Activities.Add(a);
+						}
+					}
+				}
+
+				return Activities;
+			}
+
 			/// <summary>Selects project by the name.</summary>
 			/// <returns>Project with given name.</returns>
 			/// <param name="name">Name of the project.</param>
@@ -272,19 +304,46 @@
 				{
 					using (SqliteDataReader rdr = cmd.ExecuteReader())
 					{
-						while (rdr.Read()) 
+						while (rdr.Read())
 						{
 							Project p = new Project();
 							p.ProjectId = (long) rdr["ProjectId"];
-							p.Name = (string) rdr["Name"];
+							p.Name = rdr["Name"].ToString();
 							p.Description = rdr["Description"].ToString();
 							p.Created = DateTime.Parse((string) rdr["Created"]);
 							Ret[0] = p;
 						}
-					}         
+					}
 				}
 
 				return Ret;
+			}
+
+			/// <summary>Selects all projects.</summary>
+			/// <returns>All projects.</returns>
+			public List<Project> SelectProjects()
+			{
+				List<Project> Projects = new List<Project>();
+
+				string sql = "SELECT * FROM Projects ORDER BY ProjectId ASC; ";
+
+				using (SqliteCommand cmd = new SqliteCommand(sql, Connection))
+				{
+					using (SqliteDataReader rdr = cmd.ExecuteReader())
+					{
+						while (rdr.Read())
+						{
+							Project p = new Project();
+							p.ProjectId = (long) rdr["ProjectId"];
+							p.Name = rdr["Name"].ToString();
+							p.Description = rdr["Description"].ToString();
+							p.Created = DateTime.Parse((string) rdr["Created"]);
+							Projects.Add(p);
+						}
+					}
+				}
+
+				return Projects;
 			}
 
 			/// <summary>Stops the activity (sets <c>Stopped</c> and updates database record).</summary>

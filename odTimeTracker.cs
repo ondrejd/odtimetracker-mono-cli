@@ -5,6 +5,7 @@
 namespace odTimeTracker
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using Mono.Data.Sqlite;
 	using odTimeTracker.Model;
@@ -19,9 +20,17 @@ namespace odTimeTracker
 		private static string Command;
 		private static string CommandValue;
 
-		public static string HomeDirPath { get { return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile); } }
+		public static string HomeDirPath {
+			get {
+				return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile); 
+			}
+		}
 
-		public static string ConfigFilePath { get { return Path.Combine(HomeDirPath, ".odtimetracker.conf"); } }
+		public static string ConfigFilePath {
+			get {
+				return Path.Combine(HomeDirPath, ".odtimetracker.conf"); 
+			}
+		}
 
 		/// <summary>Instance of used storage.</summary>
 		private static SqliteStorage storage;
@@ -60,6 +69,108 @@ namespace odTimeTracker
 		public static bool CheckIfConfigFileExists()
 		{
 			return File.Exists(ConfigFilePath);
+		}
+
+		/// <summary>
+		/// Prints list of latest activities to the console.
+		/// </summary>
+		private static void ListActivities()
+		{
+			List<Activity> activities = Storage.SelectActivities();
+
+			foreach (Activity activity in activities)
+			{
+				if (ColoredOutput == true)
+				{
+					Console.ForegroundColor = ConsoleColor.Blue;
+					Console.Write("{0}\t", activity.ActivityId.ToString());
+					Console.ResetColor();
+
+					Console.ForegroundColor = ConsoleColor.White;
+					Console.Write("{0} ", activity.Name);
+					Console.ResetColor();
+
+					if (activity.Tags.Trim() != "")
+					{
+						Console.ForegroundColor = ConsoleColor.Gray;
+						Console.Write(" : {0} ", activity.Tags);
+						Console.ResetColor();
+					}
+
+					if (activity.Description.Trim() != "")
+					{
+						Console.ForegroundColor = ConsoleColor.Gray;
+						Console.Write("({0})", activity.Description);
+						Console.ResetColor();
+					}
+				}
+				else
+				{
+					Console.Write("{0}\t", activity.ActivityId.ToString());
+					Console.Write("{0} ", activity.Name);
+
+					if (activity.Tags.Trim() != "")
+					{
+						Console.Write(" : {0} ", activity.Tags);
+					}
+
+					if (activity.Description.Trim() != "")
+					{
+						Console.Write("({0})", activity.Description);
+					}
+				}
+
+				Console.Write("\n");
+			}
+		}
+
+		/// <summary>
+		/// Prints list of projects to the console.
+		/// </summary>
+		private static void ListProjects()
+		{
+			List<Project> Projects = Storage.SelectProjects();
+
+			foreach (Project project in Projects)
+			{
+				if (ColoredOutput == true)
+				{
+					Console.ForegroundColor = ConsoleColor.Blue;
+					Console.Write("{0}\t", project.ProjectId.ToString());
+					Console.ResetColor();
+
+					Console.ForegroundColor = ConsoleColor.White;
+					Console.Write("{0} ", project.Name);
+					Console.ResetColor();
+
+					if (project.Description.Trim() != "")
+					{
+						Console.ForegroundColor = ConsoleColor.Gray;
+						Console.Write("({0})", project.Description);
+						Console.ResetColor();
+					}
+				}
+				else
+				{
+					Console.Write("{0}\t", project.ProjectId.ToString());
+					Console.Write("{0} ", project.Name);
+
+					if (project.Description.Trim() != "")
+					{
+						Console.Write("({0})", project.Description);
+					}
+				}
+
+				Console.Write("\n");
+			}
+		}
+
+		/// <summary>
+		/// Prints today statistics to the console.
+		/// </summary>
+		private static void ListTodayStats()
+		{
+			PrintLine("XXX Finish `ListTodayStats()` method!", ConsoleColor.Red, true);
 		}
 
 		/// <summary>
@@ -141,7 +252,10 @@ namespace odTimeTracker
 					ColoredOutput = true;
 				}
 				// Commands: [info|install|help|start|stop]
-				else if (arg == "info" || arg == "install" || arg == "help" || arg == "start" || arg == "stop")
+				else if (
+					arg == "help" || arg == "info" || arg == "install" || 
+					arg == "list" || arg == "start" || arg == "stop"
+				)
 				{
 					if (Command == "" || Command == null)
 					{
@@ -149,7 +263,7 @@ namespace odTimeTracker
 					}
 				}
 				// Get <topic> or <activity>
-				else if (Command == "help" || Command == "start")
+				else if (Command == "help" || Command == "list" || Command == "start")
 				{
 					CommandValue = arg;
 				}
@@ -176,18 +290,26 @@ namespace odTimeTracker
 			// Process arguments
 			ProcessArguments(args);
 
+			if ((Command == "list" || Command == "start") && (args.Length < 2 || args.Length > 3))
+			{
+				PrintWrongArgumentsMessage();
+				return;
+			}
+
 			// Perform the action self
 			switch (Command)
 			{
+				case "help":
+					CmdHelp((CommandValue != "" || CommandValue != null) ? CommandValue : "default");
+					break;
 				case "info":
 					CmdInfo();
 					break;
 				case "install":
 					CmdInstall();
 					break;
-				case "help":
-					string topic = (CommandValue != "" || CommandValue != null) ? CommandValue : "default";
-					CmdHelp(topic);
+				case "list":
+					CmdList(CommandValue);
 					break;
 				case "start":
 					CmdStart(CommandValue);
@@ -206,6 +328,33 @@ namespace odTimeTracker
 		//
 
 		/// <summary>
+		/// Command `help` - prints application's help.
+		/// </summary>
+		/// <param name="topic">Help topic.</param>
+		private static void CmdHelp(string topic)
+		{
+			// TODO Finish `help` command (fill all topics)!
+
+			string executable = System.Reflection.Assembly.GetEntryAssembly().Location;
+			string appName = Path.GetFileNameWithoutExtension(executable);
+			string sample = "\"New activity@Project name;tag1,tag2,tag3#Activity description.\"";
+
+			PrintLine("Example Usage", ConsoleColor.White);
+			PrintLine(" " + appName + " start " + sample);
+			PrintLine(" " + appName + " stop");
+			PrintLine(" " + appName + " help start", ConsoleColor.Gray, true);
+			PrintLine("Commands", ConsoleColor.White);
+			PrintLine(" help [<topic>]   Display help (general or on given topic)");
+			PrintLine(" info             Info about current application status");
+			PrintLine(" install          Installation and configuration wizard");
+			PrintLine(" list <what>      List data (activities, today statistics etc.)");
+			PrintLine(" start <activity> Start new activity");
+			PrintLine(" stop             Stop currently running activity", ConsoleColor.Gray, true);
+			PrintLine("Switches", ConsoleColor.White);
+			PrintLine("  --colors|-c     Turn on colored output", ConsoleColor.Gray, true);
+		}
+
+		/// <summary>
 		/// Command `info` - prints information if any activity is running (and for how long time).
 		/// </summary>
 		private static void CmdInfo()
@@ -213,7 +362,8 @@ namespace odTimeTracker
 			// Check if user's configuration already exists
 			if (CheckIfConfigFileExists() != true)
 			{
-				PrintLine("Configuration was not found. You should run `install` command.", ConsoleColor.Red, true);
+				PrintLine("Configuration was not found. You should run `install` command.", 
+					ConsoleColor.Red, true);
 				return;
 			}
 
@@ -248,7 +398,8 @@ namespace odTimeTracker
 			} 
 			else
 			{
-				if (!AskYesNoQuestion("Default configuration files will be created in your home folder. Do you want to continue?"))
+				if (!AskYesNoQuestion("Default configuration files will be created " + 
+					"in your home folder. Do you want to continue?"))
 				{
 					return;
 				}
@@ -261,32 +412,41 @@ namespace odTimeTracker
 			stream.WriteLine("db_path=" + SqliteStorage.DatabaseFilePath);
 			stream.Close();
 
-			PrintLine("Configuration file successfully created. Now you can start using this application.", ConsoleColor.Green, true);
+			PrintLine("Configuration file successfully created. Now you can " + 
+				"start using this application.", ConsoleColor.Green, true);
 		}
 
 		/// <summary>
-		/// Command `help` - prints application's help.
+		/// Command `list` - prints list of requested data to the console.
+		/// Supported data to list: activities, projects, today
 		/// </summary>
-		/// <param name="topic">Help topic.</param>
-		private static void CmdHelp(string topic)
+		/// <param name="what">What data to list.</param>
+		private static void CmdList(string what)
 		{
-			// TODO Finish `help` command (fill all topics)!
+			// Check if user's configuration already exists
+			if (CheckIfConfigFileExists() != true)
+			{
+				PrintLine("Configuration was not found. You should run `install` command.", 
+					ConsoleColor.Red, true);
+				return;
+			}
 
-			string executable = System.Reflection.Assembly.GetEntryAssembly().Location;
-			string appName = Path.GetFileNameWithoutExtension(executable);
-
-			PrintLine("Example Usage", ConsoleColor.White);
-			PrintLine(" " + appName + " start \"New activity@Project name;tag1,tag2,tag3#Activity description.\"");
-			PrintLine(" " + appName + " stop");
-			PrintLine(" " + appName + " help start", ConsoleColor.Gray, true);
-			PrintLine("Commands", ConsoleColor.White);
-			PrintLine(" info             Info about current application status");
-			PrintLine(" install          Installation and configuration wizard");
-			PrintLine(" help [<topic>]   Display help (general or on given topic)");
-			PrintLine(" start <activity> Start new activity");
-			PrintLine(" stop             Stop currently running activity", ConsoleColor.Gray, true);
-			PrintLine("Switches", ConsoleColor.White);
-			PrintLine("  --colors|-c     Turn on colored output", ConsoleColor.Gray, true);
+			switch (what)
+			{
+				case "activities":
+					ListActivities();
+					break;
+				case "projects":
+					ListProjects();
+					break;
+				case "today":
+					ListTodayStats();
+					break;
+				default:
+					PrintLine("Data keyword '" + what + "' is not recognized. " + 
+						"Try help for more informations.", ConsoleColor.Red, true);
+					break;
+			}
 		}
 
 		/// <summary>
@@ -298,7 +458,8 @@ namespace odTimeTracker
 			// Check if user's configuration already exists
 			if (CheckIfConfigFileExists() != true)
 			{
-				PrintLine("Configuration was not found. You should run `install` command.", ConsoleColor.Red, true);
+				PrintLine("Configuration was not found. You should run `install` command.", 
+					ConsoleColor.Red, true);
 				return;
 			}
 
@@ -306,7 +467,8 @@ namespace odTimeTracker
 			var fActivity = Storage.GetRunningActivity();
 			if (fActivity[0] != null)
 			{
-				PrintLine("Can not create new activity - other activity is still running.", ConsoleColor.Red, true);
+				PrintLine("Can not create new activity - other activity is still running.", 
+					ConsoleColor.Red, true);
 				return;
 			}
 
@@ -329,20 +491,23 @@ namespace odTimeTracker
 		{
 			if (CheckIfConfigFileExists() != true)
 			{
-				PrintLine("Configuration was not found. You should run `install` command.", ConsoleColor.Red, true);
+				PrintLine("Configuration was not found. You should run `install` command.", 
+					ConsoleColor.Red, true);
 				return;
 			}
 
 			var fActivity = Storage.GetRunningActivity();
 			if (fActivity[0] == null)
 			{
-				PrintLine("Can not stop activity - no activity is running.", ConsoleColor.Red, true);
+				PrintLine("Can not stop activity - no activity is running.", 
+					ConsoleColor.Red, true);
 				return;
 			}
 
 			Activity runningActivity = Storage.StopActivity(fActivity[0]);
 
-			PrintLine("Activity '" + runningActivity.Name + "' was successfully stopped!", ConsoleColor.Green);
+			PrintLine("Activity '" + runningActivity.Name + "' was successfully stopped!", 
+				ConsoleColor.Green);
 			PrintRunningTime(runningActivity.GetDuration());
 		}
 	}
