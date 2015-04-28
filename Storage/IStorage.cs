@@ -8,11 +8,18 @@
 	{
 		public interface IStorage
 		{
-			bool Initialize();
-
+			/// <summary>Returns currently running activity if exists.</summary>
+			/// <returns>Currently running activity.</returns>
 			Activity[] GetRunningActivity();
 
+			/// <summary>Inserts new activity into the database.</summary>
+			/// <returns>Activity with properly set <c>ActivityID</c>.</returns>
+			/// <param name="activity">New activity.</param>
 			Activity InsertActivity(Activity activity);
+
+			/// <summary>Inserts new project into the database.</summary>
+			/// <returns>Project with properly set <c>ProjectID</c>.</returns>
+			/// <param name="project">New project.</param>
 			Project InsertProject(Project project);
 
 			//Activity UpdateActivity(Activity activity);

@@ -8,27 +8,43 @@
 
 	namespace Storage
 	{
-		public class SqliteStorage : odTimeTracker.Storage.IStorage
+		public class SqliteStorage : IStorage
 		{
+			/// <summary>Holds connection string.</summary>
+			private string ConnectionString;
+			/// <summary>If <c>true</c> schema will be created during connection initialization.</summary>
+			private bool CreateSchema = false;
 			/// <summary>Connection to our SQLite database.</summary>
 			private SqliteConnection Connection;
 
-			public static string DocumentsDirPath {	
-				get { 
-					return Environment.GetFolderPath(Environment.SpecialFolder.Personal); 
-				}
-			}
-
-			public static string DatabaseFilePath { 
-				get { 
-					return Path.Combine(DocumentsDirPath, ".odtimetracker.sqlite"); 
-				}
-			}
-
-			// ===================================================================================
-
+			/// <summary>
+			/// Initializes a new instance of the <see cref="odTimeTracker.Storage.SqliteStorage"/> class 
+			/// with default SQLite database file.
+			/// </summary>
 			public SqliteStorage()
 			{
+				string DocumentsDirPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+				string DatabaseFilePath = Path.Combine(DocumentsDirPath, ".odtimetracker.sqlite");
+				CreateSchema = !File.Exists(DatabaseFilePath);
+
+				if (CreateSchema == true)
+				{
+					SqliteConnection.CreateFile(DatabaseFilePath);
+				}
+
+				ConnectionString = "Data Source=" + DatabaseFilePath;
+			}
+
+			/// <summary>
+			/// Initializes a new instance of the <see cref="odTimeTracker.Storage.SqliteStorage"/> class 
+			/// with given connection string.
+			/// </summary>
+			/// <param name="connectionString">Connection string (e.g. "Data Source=:memory:" etc.)</param>
+			/// <param name="createSchema">If <c>true</c> than schema will be created (Optional.)</param>
+			public SqliteStorage(string connectionString, bool createSchema = true)
+			{
+				ConnectionString = connectionString;
+				CreateSchema = createSchema;
 			}
 
 			~SqliteStorage ()
@@ -120,18 +136,10 @@
 			/// <summary>Initialize storage.</summary>
 			public bool Initialize()
 			{
-				string DbFile = DatabaseFilePath;
-				bool exists = File.Exists(DbFile);
-
-				if (!exists)
-				{
-					SqliteConnection.CreateFile(DbFile);
-				}
-
-				Connection = new SqliteConnection("Data Source=" + DbFile);
+				Connection = new SqliteConnection(ConnectionString);
 				Connection.Open();
 
-				if (!exists)
+				if (CreateSchema == true)
 				{
 					try
 					{
@@ -147,8 +155,8 @@
 				return true;
 			}
 
-			/// <summary>Retrieves currently running activity</summary>
-			/// <returns>Currently running activity; otherwise returns <c>Null</c>.</returns>
+			/// <summary>Returns currently running activity if exists.</summary>
+			/// <returns>Currently running activity.</returns>
 			public Activity[] GetRunningActivity()
 			{
 				Activity[] Ret = new Activity[1];
