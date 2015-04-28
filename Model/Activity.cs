@@ -203,6 +203,12 @@
 				return Stopped1.Subtract(Created);
 			}
 
+			/// <summary>Returns <c>true</c> if the activity is currently running.</summary>
+			public bool IsRunning()
+			{
+				return (Stopped.CompareTo(BlankDateTime) == 0);
+			}
+
 			// XXX Add own ToString() method!
 		}
 	}

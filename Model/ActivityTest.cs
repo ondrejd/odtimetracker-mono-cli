@@ -25,6 +25,7 @@
 				Assert.AreEqual(TestDateTime.Day, BlankActivity.Created.Day);
 				Assert.AreEqual(TestDateTime.Hour, BlankActivity.Created.Hour);
 				Assert.AreEqual(DateTime.Parse("0001-01-01 00:00:00.000"), BlankActivity.Stopped);
+				Assert.IsTrue(BlankActivity.IsRunning());
 			}
 
 			[Test]
@@ -45,6 +46,7 @@
 				Assert.AreEqual(DateTime.Parse("2015-01-01 01:00:00.000"), FinishedActivity.Created);
 				Assert.AreEqual(DateTime.Parse("2015-01-01 02:00:00.000"), FinishedActivity.Stopped);
 				Assert.AreEqual(3600, FinishedActivity.GetDuration().TotalSeconds);
+				Assert.IsFalse(FinishedActivity.IsRunning());
 			}
 
 			[Test]
@@ -62,12 +64,13 @@
 				Assert.IsNull(RunningActivity.Tags);
 				Assert.AreEqual(DateTime.Parse("2015-01-01 02:15:00.000"), RunningActivity.Created);
 				Assert.AreEqual(DateTime.Parse("0001-01-01 00:00:00.000"), RunningActivity.Stopped);
+				Assert.IsTrue(RunningActivity.IsRunning());
 			}
 
 			[Test]
 			public void ActivityFromStringTest()
 			{
-				SqliteStorage Storage = new SqliteStorage("Data Source=:memory:");
+				SqliteStorage Storage = new SqliteStorage("Data Source=:memory:", true);
 				Storage.Initialize();
 
 				Activity act1 = new Activity("Test activity 1", Storage);
@@ -75,41 +78,49 @@
 				Assert.AreEqual("Test activity 1", act1.Name);
 				Assert.AreEqual("", act1.Description);
 				Assert.AreEqual("", act1.Tags);
+				Assert.IsTrue(act1.IsRunning());
 
 				Activity act2 = new Activity("Test activity 2@Project name", Storage);
 				Assert.AreEqual("Test activity 2", act2.Name);
 				Assert.AreEqual("", act2.Description);
 				Assert.AreEqual("", act2.Tags);
+				Assert.IsTrue(act2.IsRunning());
 
 				Activity act3 = new Activity("Test activity 3@Project name;tag1,tag2", Storage);
 				Assert.AreEqual("Test activity 3", act3.Name);
 				Assert.AreEqual("", act3.Description);
 				Assert.AreEqual("tag1,tag2", act3.Tags);
+				Assert.IsTrue(act3.IsRunning());
 
 				Activity act4 = new Activity("Test activity 4@Project name;tag1,tag2,tag3#Some description", Storage);
 				Assert.AreEqual("Test activity 4", act4.Name);
 				Assert.AreEqual("Some description", act4.Description);
 				Assert.AreEqual("tag1,tag2,tag3", act4.Tags);
+				Assert.IsTrue(act4.IsRunning());
 
 				Activity act5 = new Activity("Test activity 5;tag1,tag2", Storage);
 				Assert.AreEqual("Test activity 5", act5.Name);
 				Assert.AreEqual("", act5.Description);
 				Assert.AreEqual("tag1,tag2", act5.Tags);
+				Assert.IsTrue(act5.IsRunning());
 
 				Activity act6 = new Activity("Test activity 6;tag3#Some description", Storage);
 				Assert.AreEqual("Test activity 6", act6.Name);
 				Assert.AreEqual("Some description", act6.Description);
 				Assert.AreEqual("tag3", act6.Tags);
+				Assert.IsTrue(act6.IsRunning());
 
 				Activity act7 = new Activity("Test activity 7@Project name#Some description", Storage);
 				Assert.AreEqual("Test activity 7", act7.Name);
 				Assert.AreEqual("Some description", act7.Description);
 				Assert.AreEqual("", act7.Tags);
+				Assert.IsTrue(act7.IsRunning());
 
 				Activity act8 = new Activity("Test activity 8#Some description", Storage);
 				Assert.AreEqual("Test activity 8", act8.Name);
 				Assert.AreEqual("Some description", act8.Description);
 				Assert.AreEqual("", act8.Tags);
+				Assert.IsTrue(act8.IsRunning());
 			}
 		}
 	}

@@ -1,8 +1,4 @@
-﻿// TODO Chybejici konfiguracni soubor nesmi nicemu branit, proste se bude fungovat bez nej s defaultni lokaci pro Sqlite databazi.
-// TODO Pokud je v konfiguracnim souboru uvedena cesta k Sqlite databazi, tak ji musime pouzit.
-// TODO V konfiguraci take muze byt nastaveni pro zapnuti/vypnuti barevneho vystupu bez nutnosti pouzit prepinace.
-
-namespace odTimeTracker
+﻿namespace odTimeTracker
 {
 	using System;
 	using System.Collections.Generic;
@@ -65,37 +61,39 @@ namespace odTimeTracker
 					Console.Write("{0}\t", activity.ActivityId.ToString());
 					Console.ResetColor();
 
-					Console.ForegroundColor = ConsoleColor.White;
-					Console.Write("{0} ", activity.Name);
+					Console.ForegroundColor = activity.IsRunning() ? ConsoleColor.Green : ConsoleColor.White;
+					Console.Write("{0}", activity.Name);
 					Console.ResetColor();
 
 					if (activity.Tags.Trim() != "")
 					{
 						Console.ForegroundColor = ConsoleColor.Gray;
-						Console.Write(" : {0} ", activity.Tags);
+						Console.Write(" [{0}]", activity.Tags);
 						Console.ResetColor();
 					}
 
 					if (activity.Description.Trim() != "")
 					{
 						Console.ForegroundColor = ConsoleColor.Gray;
-						Console.Write("({0})", activity.Description);
+						Console.Write(" - {0}", activity.Description);
 						Console.ResetColor();
 					}
 				}
 				else
 				{
+					string Name = activity.IsRunning() ? activity.Name + " (*)" : activity.Name;
+
 					Console.Write("{0}\t", activity.ActivityId.ToString());
-					Console.Write("{0} ", activity.Name);
+					Console.Write("{0} ", Name);
 
 					if (activity.Tags.Trim() != "")
 					{
-						Console.Write(" : {0} ", activity.Tags);
+						Console.Write(" [{0}]", activity.Tags);
 					}
 
 					if (activity.Description.Trim() != "")
 					{
-						Console.Write("({0})", activity.Description);
+						Console.Write(" - {0}", activity.Description);
 					}
 				}
 
