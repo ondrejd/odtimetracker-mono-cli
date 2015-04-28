@@ -44,9 +44,6 @@
 			/// <param name="activityString">Activity string.</param>
 			public Activity(string activityString, SqliteStorage storage)
 			{
-				Console.WriteLine(activityString);
-				Console.WriteLine("");
-
 				string name = "";
 				string projectName = "";
 				string tags = "";
