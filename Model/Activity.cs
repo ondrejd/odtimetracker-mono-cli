@@ -121,6 +121,10 @@
 				{
 					projectName = rest;
 				}
+				else if (name.Length == 0)
+				{
+					name = rest;
+				}
 
 				// Check if project with given name exists and if no create it!
 				long projectId = 0;
