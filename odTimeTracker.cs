@@ -152,32 +152,45 @@ namespace odTimeTracker
 			PrintLine("XXX Finish `ListTodayStats()` method!", ConsoleColor.Red, true);
 		}
 
-		/// <summary>
-		/// Prints the line to the console.
-		/// </summary>
-		/// <param name="msg">Message self</param>
-		/// <param name="col">Color of the output</param>
-		/// <param name="nl">If set to <c>true</c> nl.</param>
-		private static void PrintLine(string msg,
-		                              ConsoleColor col = ConsoleColor.Gray,
-		                              bool nl = false)
+		/// <summary>Prints the line to the console.</summary>
+		private static void PrintLineInner(string str, ConsoleColor color, bool newLine)
 		{
 			if (ColoredOutput == true)
 			{
-				Console.ForegroundColor = col;
+				Console.ForegroundColor = color;
 			}
 
-			Console.WriteLine(msg);
+			Console.WriteLine(str);
 
 			if (ColoredOutput == true)
 			{
 				Console.ResetColor();
 			}
 
-			if (nl == true)
+			if (newLine == true)
 			{
 				Console.WriteLine();
 			}
+		}
+
+		public static void PrintLine(string str)
+		{
+			PrintLineInner(str, ConsoleColor.White, false);
+		}
+
+		public static void PrintLine(string str, bool newLine)
+		{
+			PrintLineInner(str, ConsoleColor.White, newLine);
+		}
+
+		public static void PrintLine(string str, ConsoleColor color)
+		{
+			PrintLineInner(str, color, false);
+		}
+
+		public static void PrintLine(string str, ConsoleColor color, bool newLine)
+		{
+			PrintLineInner(str, color, newLine);
 		}
 
 		/// <summary>
@@ -232,14 +245,11 @@ namespace odTimeTracker
 				}
 				// Commands: [info|install|help|start|stop]
 				else if (
-					arg == "help" || arg == "info" || arg == "install" || 
-					arg == "list" || arg == "start" || arg == "stop"
+					(arg == "help" || arg == "info" || arg == "list" || arg == "start" || arg == "stop") && 
+					(Command == "" || Command == null)
 				)
 				{
-					if (Command == "" || Command == null)
-					{
-						Command = arg;
-					}
+					Command = arg;
 				}
 				// Get <topic> or <activity>
 				else if (Command == "help" || Command == "list" || Command == "start")
@@ -279,7 +289,7 @@ namespace odTimeTracker
 			switch (Command)
 			{
 				case "help":
-					CmdHelp((CommandValue != "" || CommandValue != null) ? CommandValue : "default");
+					CmdHelp(CommandValue);
 					break;
 				case "info":
 					CmdInfo();
@@ -313,20 +323,69 @@ namespace odTimeTracker
 
 			string executable = System.Reflection.Assembly.GetEntryAssembly().Location;
 			string appName = Path.GetFileNameWithoutExtension(executable);
-			string sample = "\"New activity@Project name;tag1,tag2,tag3#Activity description.\"";
+			string sample1 = "\"New activity@Project name;tag1,tag2,tag3#Activity description.\"";
+			string sample2 = "\"New activity@Project name\"";
+			string sample3 = "\"New activity;tag3,tag1#Activity description.\"";
+			string sample4 = "\"New activity#Activity description.\"";
 
-			PrintLine("Example Usage", ConsoleColor.White);
-			PrintLine(" " + appName + " start " + sample);
-			PrintLine(" " + appName + " stop");
-			PrintLine(" " + appName + " help start", ConsoleColor.Gray, true);
-			PrintLine("Commands", ConsoleColor.White);
-			PrintLine(" help [<topic>]   Display help (general or on given topic)");
-			PrintLine(" info             Info about current application status");
-			PrintLine(" list <what>      List data (activities, today statistics etc.)");
-			PrintLine(" start <activity> Start new activity");
-			PrintLine(" stop             Stop currently running activity", ConsoleColor.Gray, true);
-			PrintLine("Switches", ConsoleColor.White);
-			PrintLine("  --colors|-c     Turn on colored output", ConsoleColor.Gray, true);
+			Console.WriteLine();
+
+			switch (topic)
+			{
+				case "info":
+					PrintLine("Description", ConsoleColor.Blue, true);
+					PrintLine("Prints info about current status - if is there any activity running prints its name and for how long is running.", true);
+					PrintLine("Usage", ConsoleColor.Blue, true);
+					PrintLine(" " + appName + " info");
+					break;
+
+				case "list":
+					PrintLine("Description", ConsoleColor.Blue, true);
+					PrintLine("Lists activities, projects or today statistics.", true);
+					PrintLine("Usage", ConsoleColor.Blue, true);
+					PrintLine(" " + appName + " -c list activities");
+					PrintLine(" " + appName + " list projects");
+					PrintLine(" " + appName + " list today");
+					break;
+
+				case "start":
+					PrintLine("Description", ConsoleColor.Blue, true);
+					PrintLine("Starts new activity. In one time can exist only one running activity so other activity has to be stopped before the new one is started.", true);
+					PrintLine("Activity is described by string where (order is important):", true);
+					PrintLine("- the first part is the name of activity");
+					PrintLine("- part starting with `@` is name of activity's project");
+					PrintLine("- part starting with `;` are comma-separated tags");
+					PrintLine("- part starting with `#` is description", true);
+					PrintLine("Usage", ConsoleColor.Blue, true);
+					PrintLine(" " + appName + " start " + sample1);
+					PrintLine(" " + appName + " start " + sample2);
+					PrintLine(" " + appName + " start " + sample3);
+					PrintLine(" " + appName + " start " + sample4);
+					break;
+
+				case "stop":
+					PrintLine("Description", ConsoleColor.Blue, true);
+					PrintLine("Stops currently running activity.", true);
+					PrintLine("Usage", ConsoleColor.Blue, true);
+					PrintLine(" " + appName + " stop");
+					break;
+
+				case "help":
+				default:
+					PrintLine("Example Usage", ConsoleColor.Blue, true);
+					PrintLine(" " + appName + " start " + sample1);
+					PrintLine(" " + appName + " stop");
+					PrintLine(" " + appName + " help start", true);
+					PrintLine("Commands", ConsoleColor.Blue, true);
+					PrintLine(" help [<topic>]   Display help (general or on given topic)");
+					PrintLine(" info             Info about current application status");
+					PrintLine(" list <what>      List data (activities, today statistics etc.)");
+					PrintLine(" start <activity> Start new activity");
+					PrintLine(" stop             Stop currently running activity", true);
+					PrintLine("Switches", ConsoleColor.Blue, true);
+					PrintLine("  --colors|-c     Turn on colored output");
+					break;
+			}
 		}
 
 		/// <summary>
