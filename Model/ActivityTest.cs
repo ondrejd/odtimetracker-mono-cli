@@ -6,7 +6,7 @@
 
 	namespace Model
 	{
-		[TestFixture()]
+		[TestFixture]
 		public class ActivityTest
 		{
 			[Test]

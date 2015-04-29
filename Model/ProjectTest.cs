@@ -5,7 +5,7 @@
 
 	namespace Model
 	{
-		[TestFixture()]
+		[TestFixture]
 		public class ProjectTest
 		{
 			private Project BlankProject;

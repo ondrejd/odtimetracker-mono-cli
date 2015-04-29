@@ -41,7 +41,7 @@
 			/// </summary>
 			/// <param name="connectionString">Connection string (e.g. "Data Source=:memory:" etc.)</param>
 			/// <param name="createSchema">If <c>true</c> than schema will be created (Optional.)</param>
-			public SqliteStorage(string connectionString, bool createSchema = true)
+			public SqliteStorage(string connectionString, bool createSchema = false)
 			{
 				ConnectionString = connectionString;
 				CreateSchema = createSchema;
@@ -74,15 +74,15 @@
 			// ===================================================================================
 
 			/// <summary>Executes the non query SQL.</summary>
-			/// <param name="SqlString">SQL string.</param>
-			private void ExecuteNonQuerySql(string SqlString)
+			/// <param name="sqlString">SQL string.</param>
+			private void ExecuteNonQuerySql(string sqlString)
 			{
 				SqliteCommand Cmd = null;
 
 				try
 				{
 					Cmd = Connection.CreateCommand();
-					Cmd.CommandText = SqlString;
+					Cmd.CommandText = sqlString;
 					Cmd.CommandType = System.Data.CommandType.Text;
 					Cmd.ExecuteNonQuery();
 				} 

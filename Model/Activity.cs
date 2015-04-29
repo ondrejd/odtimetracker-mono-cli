@@ -208,8 +208,6 @@
 			{
 				return (Stopped.CompareTo(BlankDateTime) == 0);
 			}
-
-			// XXX Add own ToString() method!
 		}
 	}
 }
