@@ -9,6 +9,9 @@
 
 	class MainClass
 	{
+		/// <summary>Application's version.</summary>
+		const string Version = "0.2";
+
 		// Flags
 		private static bool ColoredOutput = false;
 
@@ -150,6 +153,13 @@
 			PrintLine("XXX Finish `ListTodayStats()` method!", ConsoleColor.Red, true);
 		}
 
+		/// <summary>Prints the application's info.</summary>
+		private static void PrintAppInfo()
+		{
+			PrintLine("odTimeTracker " + Version, ConsoleColor.Blue);
+			PrintLine("(c) 2015 Copyright Ondřej Doněk. Licensed under Mozilla Public License 2.0.", ConsoleColor.Blue, true);
+		}
+
 		/// <summary>Prints the line to the console.</summary>
 		private static void PrintLineInner(string str, ConsoleColor color, bool newLine)
 		{
@@ -267,15 +277,15 @@
 		/// <param name="args">The command-line arguments.</param>
 		public static void Main(string[] args)
 		{
-			// No arguments - print error message
 			if (args.Length == 0 || args.Length > 4)
 			{
+				PrintAppInfo();
 				PrintWrongArgumentsMessage();
 				return;
 			}
 
-			// Process arguments
 			ProcessArguments(args);
+			PrintAppInfo();
 
 			if ((Command == "list" || Command == "start") && (args.Length < 2 || args.Length > 3))
 			{
@@ -283,7 +293,6 @@
 				return;
 			}
 
-			// Perform the action self
 			switch (Command)
 			{
 				case "help":
