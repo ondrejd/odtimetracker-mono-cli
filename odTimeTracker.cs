@@ -25,7 +25,7 @@
 			get {
 				if (storage == null)
 				{
-					storage = new odTimeTracker.Storage.SqliteStorage();
+					storage = new SqliteStorage();
 					storage.Initialize();
 				}
 
@@ -60,7 +60,7 @@
 			{
 				if (ColoredOutput == true)
 				{
-					Console.ForegroundColor = ConsoleColor.Blue;
+					Console.ForegroundColor = ConsoleColor.Red;
 					Console.Write("{0}\t", activity.ActivityId.ToString());
 					Console.ResetColor();
 
@@ -78,6 +78,7 @@
 					if (activity.Description.Trim() != "")
 					{
 						Console.ForegroundColor = ConsoleColor.Gray;
+						Console.Write("\n \t");
 						Console.Write(" - {0}", activity.Description);
 						Console.ResetColor();
 					}
@@ -86,7 +87,7 @@
 				{
 					string Name = activity.IsRunning() ? activity.Name + " (*)" : activity.Name;
 
-					Console.Write("{0}\t", activity.ActivityId.ToString());
+					Console.Write("{0}, ", activity.ActivityId.ToString());
 					Console.Write("{0} ", Name);
 
 					if (activity.Tags.Trim() != "")
@@ -96,6 +97,7 @@
 
 					if (activity.Description.Trim() != "")
 					{
+						Console.Write("\n \t");
 						Console.Write(" - {0}", activity.Description);
 					}
 				}
@@ -116,7 +118,7 @@
 				if (ColoredOutput == true)
 				{
 					Console.ForegroundColor = ConsoleColor.Blue;
-					Console.Write("{0}\t", project.ProjectId.ToString());
+					Console.Write("{0}, ", project.ProjectId.ToString());
 					Console.ResetColor();
 
 					Console.ForegroundColor = ConsoleColor.White;
@@ -326,8 +328,6 @@
 		/// <param name="topic">Help topic.</param>
 		private static void CmdHelp(string topic)
 		{
-			// TODO Finish `help` command (fill all topics)!
-
 			string executable = System.Reflection.Assembly.GetEntryAssembly().Location;
 			string appName = Path.GetFileNameWithoutExtension(executable);
 			string sample1 = "\"New activity@Project name;tag1,tag2,tag3#Activity description.\"";
@@ -393,6 +393,8 @@
 					PrintLine("  --colors|-c     Turn on colored output");
 					break;
 			}
+
+			Console.WriteLine();
 		}
 
 		/// <summary>
@@ -432,8 +434,9 @@
 					ListTodayStats();
 					break;
 				default:
-					PrintLine("Data keyword '" + what + "' is not recognized. " + 
-						"Try help for more informations.", ConsoleColor.Red, true);
+					PrintLine("Keyword '" + what + "' is not recognized - use `activities`, " + 
+						"`projects` or `today`. Try help for more informations.", 
+						ConsoleColor.Red, true);
 					break;
 			}
 		}
